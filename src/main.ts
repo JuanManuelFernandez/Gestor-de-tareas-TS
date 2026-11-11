@@ -7,7 +7,24 @@ interface Task {
   completed: boolean;
 }
 
-const tasks: Task[] = []; //Array para almacenar las tareas
+const STORAGE_KEY = 'tasks-manager-key' //Clave para almacenar las tareas en el localStorage
+
+const loadTasks = (): Task[] => {
+  const savedTasks = localStorage.getItem(STORAGE_KEY) //Obtiene las tareas guardadas en el localStorage
+
+  if (savedTasks === null) {
+    return [] //Si no hay tareas guardadas, devuelve un array vacío
+  }
+
+  return JSON.parse(savedTasks) as Task[] //Convierte la cadena JSON en un array de tareas
+}
+
+const tasks: Task[] = loadTasks() //Carga las tareas guardadas al iniciar la aplicación
+
+const saveTasks = (): void => {
+  const tasksAsText = JSON.stringify(tasks) //Convierte el array de tareas en una cadena JSON
+  localStorage.setItem(STORAGE_KEY, tasksAsText) //Guarda la cadena JSON en el localStorage
+}
 
 const taskForm = document.querySelector<HTMLFormElement>('#task-form')
 
@@ -48,7 +65,19 @@ const renderTask = (): void => {
       renderTask() //Renderiza la lista de tareas actualizada
     })
 
-    listItem.append(taskText, deleteButton)
+    const checkbox = document.createElement('input') //Crea un checkbox para marcar la tarea como completada
+    checkbox.type = 'checkbox'
+    checkbox.checked = task.completed //Marca el checkbox si la tarea está completada
+    checkbox.setAttribute('aria-label', `Marcar tarea como completada: ${task.text}`) //Agrega un atributo aria-label para accesibilidad
+
+    checkbox.addEventListener('change', () => { //Evento para marcar la tarea como completada
+      task.completed = checkbox.checked //Actualiza el estado de completado de la tarea
+      renderTask() //Renderiza la lista de tareas actualizada
+    })
+
+    listItem.classList.toggle('completed', task.completed) //Agrega o quita la clase 'completed' según el estado de la tarea
+
+    listItem.append(checkbox, taskText, deleteButton)
     taskList.append(listItem) //Agrega el elemento de lista a la lista de tareas
   })
 }
@@ -71,12 +100,14 @@ taskForm.addEventListener('submit', (event) => { //Evento para subir la agregar 
   }
 
   tasks.push(newTask) //Agrega la nueva tarea al array de tareas
+  saveTasks() //Guarda las tareas actualizadas en el localStorage
   renderTask() //Renderiza la lista de tareas actualizada
 
   console.log(tasks)
 
   taskInput.value = '' //Limpia el input después de agregar la tarea
 })
+
 
 
 

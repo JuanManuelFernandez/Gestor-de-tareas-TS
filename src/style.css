@@ -36,6 +36,28 @@ body {
   margin-bottom: 20px;
 }
 
+#task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#task-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+#task-list li span {
+  flex: 1;
+}
+
+#task-list li.completed span {
+  color: #888;
+  text-decoration: line-through;
+}
+
 #task-input {
   flex: 1;
   padding: 10px;
