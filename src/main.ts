@@ -34,8 +34,24 @@ const taskList = document.querySelector<HTMLUListElement>('#task-list')
 
 const emptyMessage = document.querySelector<HTMLParagraphElement>('#empty-message')
 
-if(!taskForm || !taskInput || !taskList || !emptyMessage) {
+const taskCounter = document.querySelector<HTMLParagraphElement>('#task-counter')
+
+if(!taskForm || !taskInput || !taskList || !emptyMessage || !taskCounter) {
   throw new Error('No se pudo encontrar el formulario o el input de tarea');
+}
+
+const updateCounter = (): void => {
+  const pendingTasks = tasks.filter((task) => !task.completed)
+
+  const pendingCount = pendingTasks.length
+
+  if(pendingCount === 1) {
+    taskCounter.textContent = `1 tarea pendiente`
+  } else {
+    taskCounter.textContent = `${pendingCount} tareas pendientes`
+  }
+
+  taskCounter.hidden = tasks.length === 0 //Oculta el contador si no hay tareas
 }
 
 const renderTask = (): void => {
@@ -43,6 +59,8 @@ const renderTask = (): void => {
 
   emptyMessage.hidden = tasks.length > 0 //Muestra u oculta el mensaje de "No hay tareas pendientes" según la cantidad de tareas
 
+  updateCounter() //Actualiza el contador de tareas pendientes
+  
   tasks.forEach((task) => {
     const listItem = document.createElement('li') //Crea un elemento de lista para cada tarea
 
@@ -62,6 +80,7 @@ const renderTask = (): void => {
       }
 
       tasks.splice(taskIndex, 1) //Elimina la tarea del array
+      saveTasks() //Guarda las tareas actualizadas en el localStorage
       renderTask() //Renderiza la lista de tareas actualizada
     })
 
@@ -72,6 +91,7 @@ const renderTask = (): void => {
 
     checkbox.addEventListener('change', () => { //Evento para marcar la tarea como completada
       task.completed = checkbox.checked //Actualiza el estado de completado de la tarea
+      saveTasks() //Guarda las tareas actualizadas en el localStorage
       renderTask() //Renderiza la lista de tareas actualizada
     })
 
@@ -104,10 +124,9 @@ taskForm.addEventListener('submit', (event) => { //Evento para subir la agregar 
   renderTask() //Renderiza la lista de tareas actualizada
 
   console.log(tasks)
-
+  
   taskInput.value = '' //Limpia el input después de agregar la tarea
 })
-
 
 
 
